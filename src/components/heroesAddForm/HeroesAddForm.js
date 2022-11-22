@@ -1,10 +1,6 @@
-import { useDispatch, useSelector } from "react-redux";
-import { heroAdding } from "../heroesList/heroesSlice";
 import { useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
-import { useHttp } from "../../hooks/http.hook";
-import { selectAll } from "../heroesFilters/filtersSlice";
-import store from "../../store";
+import { useCreateHeroMutation, useGetFiltersQuery } from "../../api/apiSlice";
 // Задача для этого компонента:
 // Реализовать создание нового героя с введенными данными. Он должен попадать
 // в общее состояние и отображаться в списке + фильтроваться
@@ -16,33 +12,34 @@ import store from "../../store";
 // данных из фильтров
 
 const HeroesAddForm = () => {
-    const dispatch = useDispatch();
-    const request = useHttp();
-    const filters = selectAll(store.getState());
+
+    const [createHero, {isLoading, isError}] = useCreateHeroMutation();
+    const {data: filters = []} = useGetFiltersQuery();    
     
-    const {filtersLoadingStatus} = useSelector(state => state.filters);
     const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [element, setElement] = useState('Огонь')
+    const [description, setDescription] = useState('');    
 
-    const filtersRender = (filters, status) => {
+    const filtersRender = (filters) => {
 
-        if (status === "loading") {
+        if (isLoading) {
             return <option>Загрузка элементов</option>
-        } else if (status === "error") {
+        } else if (isError) {
             return <option>Ошибка загрузки</option>
         }
         if (filters && filters.length > 0 ) {
+            
             return filters.map((item, i) => {
                 // eslint-disable-next-line
                 if (name === 'Все')  return;
 
-                return <option key={i} value={item}>{item.element}</option>
+                return <option key={i} value={item.element}>{item.element}</option>
             })
         }
     }
+    const [element, setElement] = useState('Огонь')
 
     function sendHero(e) {
+        
         e.preventDefault();
         const id = uuidv4();
         let hero = {
@@ -51,15 +48,15 @@ const HeroesAddForm = () => {
             description,
             element
         };
-        dispatch(heroAdding(hero));
-        request(`http://localhost:3001/heroes/`, "POST", JSON.stringify(hero))
+        createHero(hero).unwrap();
+
         e.target.reset()
         setName('');
         setDescription('');
         setElement('Огонь');
     }
 
-    const filtersList = filtersRender(filters, filtersLoadingStatus);
+    const filtersList = filtersRender(filters);
 
     return (
         <form className="border p-4 shadow-lg rounded" 

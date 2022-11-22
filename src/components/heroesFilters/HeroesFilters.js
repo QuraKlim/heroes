@@ -4,8 +4,7 @@ import classNames from 'classnames'
 import { filteringHeroes } from "./filtersSlice";
 import { fetchFilters } from "./filtersSlice";
 import Spinner from "../spinner/Spinner";
-import { selectAll } from "./filtersSlice";
-import store from "../../store";
+import { useGetFiltersQuery } from "../../api/apiSlice";
 
 
 // Задача для этого компонента:
@@ -17,12 +16,12 @@ import store from "../../store";
 
 const HeroesFilters = () => {
 
+    const {data: filters = []} = useGetFiltersQuery();
+
     
 
     const {activeFilter, heroesLoadingStatus} = useSelector(state => state.filters)
     const dispatch = useDispatch();
-    const filters = selectAll(store.getState());
-    console.log(filters)
 
     useEffect(() => {
         dispatch(fetchFilters())

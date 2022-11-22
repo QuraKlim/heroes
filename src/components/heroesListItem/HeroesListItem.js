@@ -1,13 +1,11 @@
-import {useDispatch} from 'react-redux';
-import { heroDeleting } from '../heroesList/heroesSlice';
 import { Transition } from "react-transition-group";
-import { useHttp } from '../../hooks/http.hook';
+import { useDeleteHeroMutation } from '../../api/apiSlice';
 
 const HeroesListItem = ({id, name, description, element}) => {
 
-    const dispatch = useDispatch();
-    const request = useHttp();
     let elementClassName;
+
+    const [deleteHero] = useDeleteHeroMutation();
 
     switch (element) {
         case 'Огонь':
@@ -41,10 +39,7 @@ const HeroesListItem = ({id, name, description, element}) => {
                     </div>
                     <span 
                         className="position-absolute top-0 start-100 translate-middle badge border rounded-pill bg-light"
-                        onClick={() => {
-                            dispatch(heroDeleting(id));
-                            request(`http://localhost:3001/heroes/${id}`, "DELETE")
-                        }}>
+                        onClick={e => deleteHero(id)}>
                         <button type="button" className="btn-close btn-close" aria-label="Close"></button>
                     </span>
                 </li>
